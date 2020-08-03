@@ -1211,8 +1211,14 @@ public class ServiceStateTracker extends Handler {
                 }
                 // This will do nothing in the 'radio not available' case
                 setPowerStateToDesired();
-                // These events are modem triggered, so pollState() needs to be forced
-                modemTriggeredPollState();
+                if (needsLegacyPollState()) {
+                    // Some older radio blobs need this to put device
+                    // properly into airplane mode.
+                    pollState();
+                } else {
+                    // These events are modem triggered, so pollState() needs to be forced
+                    modemTriggeredPollState();
+                }
                 break;
 
             case EVENT_NETWORK_STATE_CHANGED:
@@ -5547,7 +5553,7 @@ public class ServiceStateTracker extends Handler {
             return;
         }
         for (CellInfo cellInfo : cellInfos) {
-            if (cellInfo.isRegistered()) {
+            if (cellInfo != null && cellInfo.isRegistered()) {
                 updateOperatorNameForCellIdentity(cellInfo.getCellIdentity());
             }
         }
@@ -5641,5 +5647,12 @@ public class ServiceStateTracker extends Handler {
         }
 
         return idSet;
+    }
+
+    private boolean needsLegacyPollState() {
+        if (mCi instanceof RIL) {
+            return ((RIL) mCi).needsOldRilFeature("legacypollstate");
+        }
+        return false;
     }
 }

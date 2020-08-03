@@ -325,10 +325,11 @@ public class DataConnection extends StateMachine {
     static final int EVENT_REEVALUATE_RESTRICTED_STATE = BASE + 25;
     static final int EVENT_REEVALUATE_DATA_CONNECTION_PROPERTIES = BASE + 26;
     static final int EVENT_NR_STATE_CHANGED = BASE + 27;
-    static final int EVENT_DATA_CONNECTION_METEREDNESS_CHANGED = BASE + 28;
-    static final int EVENT_NR_FREQUENCY_CHANGED = BASE + 29;
-    protected static final int EVENT_RETRY_CONNECTION = BASE + 30;
-    private static final int CMD_TO_STRING_COUNT = EVENT_RETRY_CONNECTION - BASE + 1;
+    protected static final int EVENT_RETRY_CONNECTION = BASE + 28;
+
+    static final int EVENT_DATA_CONNECTION_METEREDNESS_CHANGED = BASE + 29;
+    static final int EVENT_NR_FREQUENCY_CHANGED = BASE + 30;
+    private static final int CMD_TO_STRING_COUNT = EVENT_NR_FREQUENCY_CHANGED - BASE + 1;
 
     private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
     static {
@@ -365,10 +366,10 @@ public class DataConnection extends StateMachine {
         sCmdToString[EVENT_REEVALUATE_DATA_CONNECTION_PROPERTIES - BASE] =
                 "EVENT_REEVALUATE_DATA_CONNECTION_PROPERTIES";
         sCmdToString[EVENT_NR_STATE_CHANGED - BASE] = "EVENT_NR_STATE_CHANGED";
+        sCmdToString[EVENT_RETRY_CONNECTION - BASE] = "EVENT_RETRY_CONNECTION";
         sCmdToString[EVENT_DATA_CONNECTION_METEREDNESS_CHANGED - BASE] =
                 "EVENT_DATA_CONNECTION_METEREDNESS_CHANGED";
         sCmdToString[EVENT_NR_FREQUENCY_CHANGED - BASE] = "EVENT_NR_FREQUENCY_CHANGED";
-        sCmdToString[EVENT_RETRY_CONNECTION - BASE] = "EVENT_RETRY_CONNECTION";
     }
     // Convert cmd to string or null if unknown
     static String cmdToString(int cmd) {
@@ -1044,9 +1045,10 @@ public class DataConnection extends StateMachine {
         // NR 5G Non-Standalone use LTE cell as the primary cell, the ril technology is LTE in this
         // case. We use NR 5G TCP buffer size when connected to NR 5G Non-Standalone network.
         if (mTransportType == AccessNetworkConstants.TRANSPORT_TYPE_WWAN
-                && (rilRat == ServiceState.RIL_RADIO_TECHNOLOGY_LTE
-                || rilRat == ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA)
-                && isNRConnected()
+                && (
+                    rilRat == ServiceState.RIL_RADIO_TECHNOLOGY_LTE 
+                    || rilRat == ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA
+                ) && isNRConnected()
                 && mPhone.getServiceStateTracker().getNrContextIds().contains(mCid)) {
             ratName = RAT_NAME_5G;
         }
