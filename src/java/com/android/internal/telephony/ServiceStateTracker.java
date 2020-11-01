@@ -1995,18 +1995,15 @@ public class ServiceStateTracker extends Handler {
             }
         }
 
-        int newNrState = regInfo.getNrState();
+        int oldNrState = regInfo.getNrState();
+        int newNrState = oldNrState;
         if (hasNrSecondaryServingCell) {
-            if (regInfo.getNrState() == NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED) {
-                newNrState = NetworkRegistrationInfo.NR_STATE_CONNECTED;
-            }
+            newNrState = NetworkRegistrationInfo.NR_STATE_CONNECTED;
         } else {
-            if (regInfo.getNrState() == NetworkRegistrationInfo.NR_STATE_CONNECTED) {
-                newNrState = NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED;
-            }
+            newNrState = regInfo.getNrState();
         }
 
-        boolean hasChanged = newNrState != regInfo.getNrState();
+        boolean hasChanged = newNrState != oldNrState;
         regInfo.setNrState(newNrState);
         ss.addNetworkRegistrationInfo(regInfo);
         return hasChanged;
@@ -2836,7 +2833,8 @@ public class ServiceStateTracker extends Handler {
                     AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
                     Intent intent = new Intent(ACTION_RADIO_OFF);
-                    mRadioOffIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+                    mRadioOffIntent = PendingIntent.getBroadcast(
+                            context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
                     mAlarmSwitch = true;
                     if (DBG) log("Alarm setting");
